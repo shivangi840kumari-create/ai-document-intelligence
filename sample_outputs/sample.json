@@ -1,0 +1,35 @@
+{
+  "id": 1,
+  "filename": "sample_invoice.pdf",
+  "document_type": "invoice",
+  "status": "PASS",
+  "extracted_data": {
+    "document_type": "invoice",
+    "fields": {
+      "invoice_number": "INV-001",
+      "invoice_date": "2026-09-01",
+      "vendor": "ABC Pvt Ltd",
+      "customer": "XYZ Ltd",
+      "currency": "INR",
+      "subtotal": 10000,
+      "discount": 500,
+      "tax": 1710,
+      "total": 11210
+    }
+  },
+  "financial_validation": {
+    "document_type": "invoice",
+    "overall_status": "PASS",
+    "tolerance": 0.01,
+    "validations": [
+      {
+        "rule": "invoice_total_calculation",
+        "expected_value": 11210,
+        "actual_value": 11210,
+        "difference": 0,
+        "status": "PASS",
+        "message": "Invoice total calculation is correct."
+      }
+    ]
+  }
+}

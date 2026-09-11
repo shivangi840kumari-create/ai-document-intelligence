@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+python-dotenv
+sqlalchemy
+aiosqlite
+pymupdf
+pillow
+pytesseract
+httpx
+pytest
+pytest-asyncio
+anthropic
+google-genai

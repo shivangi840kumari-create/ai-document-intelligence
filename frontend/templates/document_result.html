@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Document Result</title>
+
+    <link rel="stylesheet"
+          href="/static/css/style.css">
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <header class="header">
+
+        <div>
+
+            <h1>Document Result</h1>
+
+            <p id="filename">
+                Loading...
+            </p>
+
+        </div>
+
+        <a href="/" class="back-button">
+            ← Dashboard
+        </a>
+
+    </header>
+
+
+    <div id="loading">
+        Loading document...
+    </div>
+
+
+    <main id="resultContainer" class="hidden">
+
+
+        <!-- STATUS -->
+
+        <section class="result-card">
+
+            <div class="result-header">
+
+                <div>
+
+                    <h2 id="documentType">
+                        Invoice
+                    </h2>
+
+                    <p id="documentId">
+                        Document ID
+                    </p>
+
+                </div>
+
+                <div id="statusBadge"
+                     class="status-badge">
+                    PASS
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- EXTRACTED FIELDS -->
+
+        <section class="result-card">
+
+            <h2>Extracted Fields</h2>
+
+            <div
+                id="fieldsContainer"
+                class="fields-grid">
+            </div>
+
+        </section>
+
+
+
+        <!-- TABLES -->
+
+        <section class="result-card">
+
+            <h2>Extracted Tables</h2>
+
+            <div id="tablesContainer">
+            </div>
+
+        </section>
+
+
+
+        <!-- VALIDATION -->
+
+        <section class="result-card">
+
+            <h2>Financial Validation</h2>
+
+            <div id="validationContainer">
+            </div>
+
+        </section>
+
+
+
+        <!-- SOURCE TEXT -->
+
+        <section class="result-card">
+
+            <h2>Source Text</h2>
+
+            <div id="sourceContainer">
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<script>
+
+async function loadDocument() {
+
+    const params = new URLSearchParams(
+        window.location.search
+    );
+
+    const id = params.get("id");
+
+
+    if (!id) {
+
+        document.getElementById("loading").innerText =
+            "Document ID is missing.";
+
+        return;
+    }
+
+
+    try {
+
+        const response = await fetch(
+            `/api/v1/documents/${id}`
+        );
+
+        const data = await response.json();
+
+
+        if (!response.ok || data.error) {
+
+            throw new Error(
+                data.error || "Failed to load document."
+            );
+        }
+
+
+        renderDocument(data);
+
+
+    } catch (error) {
+
+        document.getElementById("loading").innerText =
+            error.message;
+
+    }
+
+}
+
+
+
+function renderDocument(data) {
+
+    document.getElementById("loading")
+        .classList.add("hidden");
+
+
+    document.getElementById("resultContainer")
+        .classList.remove("hidden");
+
+
+    document.getElementById("filename")
+        .innerText = data.filename;
+
+
+    document.getElementById("documentType")
+        .innerText = formatType(
+            data.document_type
+        );
+
+
+    document.getElementById("documentId")
+        .innerText = `Document ID: ${data.id}`;
+
+
+    const status =
+        data.status || "NOT_APPLICABLE";
+
+
+    const badge =
+        document.getElementById("statusBadge");
+
+
+    badge.innerText = status;
+
+
+    badge.className =
+        "status-badge " +
+        status.toLowerCase();
+
+
+
+    renderFields(
+        data.extracted_data?.fields || {}
+    );
+
+
+    renderTables(
+        data.extracted_data?.tables || []
+    );
+
+
+    renderValidation(
+        data.financial_validation
+    );
+
+
+    renderSource(
+        data.extracted_data
+    );
+
+}
+
+
+
+function renderFields(fields) {
+
+    const container =
+        document.getElementById(
+            "fieldsContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    Object.entries(fields).forEach(
+        ([key, field]) => {
+
+            let value = field;
+
+            let confidence = null;
+
+            let evidence = null;
+
+            let page = null;
+
+
+            if (
+                field &&
+                typeof field === "object" &&
+                "value" in field
+            ) {
+
+                value = field.value;
+
+                confidence =
+                    field.confidence;
+
+                evidence =
+                    field.evidence;
+
+                page =
+                    field.page_number;
+
+            }
+
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+
+                value = "—";
+
+            }
+
+
+            const card =
+                document.createElement("div");
+
+            card.className = "field-card";
+
+
+            let confidenceHtml = "";
+
+
+            if (confidence !== null) {
+
+                confidenceHtml = `
+                    <div class="confidence">
+                        Confidence:
+                        ${Math.round(confidence * 100)}%
+                    </div>
+                `;
+
+            }
+
+
+            let evidenceHtml = "";
+
+
+            if (evidence) {
+
+                evidenceHtml = `
+                    <div class="evidence">
+                        "${escapeHtml(evidence)}"
+                    </div>
+                `;
+
+            }
+
+
+            let pageHtml = "";
+
+
+            if (page) {
+
+                pageHtml = `
+                    <div class="page">
+                        Page ${page}
+                    </div>
+                `;
+
+            }
+
+
+            card.innerHTML = `
+
+                <div class="field-name">
+                    ${formatFieldName(key)}
+                </div>
+
+                <div class="field-value">
+                    ${escapeHtml(String(value))}
+                </div>
+
+                ${confidenceHtml}
+
+                ${evidenceHtml}
+
+                ${pageHtml}
+
+            `;
+
+
+            container.appendChild(card);
+
+        }
+    );
+
+}
+
+
+
+/*
+    =====================================================
+    EXTRACTED TABLES
+    =====================================================
+*/
+
+function renderTables(tables) {
+
+    const container =
+        document.getElementById(
+            "tablesContainer"
+        );
+
+
+    /*
+        No tables
+    */
+
+    if (!tables || tables.length === 0) {
+
+        container.innerHTML =
+            "<p>No tables extracted.</p>";
+
+        return;
+    }
+
+
+    /*
+        Build all tables
+    */
+
+    container.innerHTML = tables.map(table => {
+
+        const columns =
+            table.columns || [];
+
+
+        const rows =
+            table.rows || [];
+
+
+        return `
+
+            <div class="table-card">
+
+                <h3>
+                    ${escapeHtml(
+                        table.name || "Table"
+                    )}
+                </h3>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                ${
+                                    columns.map(
+                                        column => `
+                                            <th>
+                                                ${escapeHtml(
+                                                    String(column)
+                                                )}
+                                            </th>
+                                        `
+                                    ).join("")
+                                }
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            ${
+                                rows.map(row => `
+
+                                    <tr>
+
+                                        ${
+                                            columns.map(
+                                                column => `
+                                                    <td>
+                                                        ${escapeHtml(
+                                                            String(
+                                                                row[column] ?? "—"
+                                                            )
+                                                        )}
+                                                    </td>
+                                                `
+                                            ).join("")
+                                        }
+
+                                    </tr>
+
+                                `).join("")
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                ${
+                    table.page_number
+                        ? `
+                            <p class="page-info">
+                                Page ${table.page_number}
+                            </p>
+                        `
+                        : ""
+                }
+
+            </div>
+
+        `;
+
+    }).join("");
+
+}
+
+
+
+function renderValidation(validation) {
+
+    const container =
+        document.getElementById(
+            "validationContainer"
+        );
+
+
+    if (!validation) {
+
+        container.innerHTML =
+            "<p>No validation result available.</p>";
+
+        return;
+
+    }
+
+
+    let html = `
+
+        <div class="validation-summary">
+
+            <strong>
+                Overall Status:
+            </strong>
+
+            <span class="status-badge ${(
+                validation.overall_status || ""
+            ).toLowerCase()}">
+
+                ${validation.overall_status}
+
+            </span>
+
+        </div>
+
+    `;
+
+
+    (validation.validations || [])
+        .forEach(item => {
+
+            html += `
+
+                <div class="validation-item">
+
+                    <strong>
+                        ${formatFieldName(item.rule)}
+                    </strong>
+
+                    <span>
+                        ${item.status}
+                    </span>
+
+                    <p>
+                        ${escapeHtml(
+                            item.message || ""
+                        )}
+                    </p>
+
+                </div>
+
+            `;
+
+        });
+
+
+    container.innerHTML = html;
+
+}
+
+
+
+function renderSource(extractedData) {
+
+    const container =
+        document.getElementById(
+            "sourceContainer"
+        );
+
+
+    const text =
+        extractedData?.raw_text;
+
+
+    if (!text) {
+
+        container.innerHTML =
+            "<p>Source text is available in the processing API response.</p>";
+
+        return;
+
+    }
+
+
+    container.innerHTML = `
+
+        <pre>
+${escapeHtml(text)}
+        </pre>
+
+    `;
+
+}
+
+
+
+function formatFieldName(name) {
+
+    return name
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, char =>
+            char.toUpperCase()
+        );
+
+}
+
+
+
+function formatType(type) {
+
+    return type
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, char =>
+            char.toUpperCase()
+        );
+
+}
+
+
+
+function escapeHtml(value) {
+
+    return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+
+loadDocument();
+
+</script>
+
+</body>
+
+</html>

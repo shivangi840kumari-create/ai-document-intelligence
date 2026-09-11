@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Document Intelligence</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <div>
+            <h1>AI Document Intelligence</h1>
+            <p>Financial document extraction and validation</p>
+        </div>
+
+        <div class="api-status">
+            <span class="status-dot"></span>
+            API Online
+        </div>
+    </header>
+
+
+    <section class="upload-card">
+
+        <h2>Process Financial Document</h2>
+
+        <p class="subtitle">
+            Upload an invoice or financial statement for AI-powered extraction.
+        </p>
+
+
+        <form id="uploadForm">
+
+            <label for="documentType">
+                Document Type
+            </label>
+
+            <select id="documentType" required>
+
+                <option value="invoice">
+                    Invoice
+                </option>
+
+                <option value="balance_sheet">
+                    Balance Sheet
+                </option>
+
+                <option value="profit_loss">
+                    Profit & Loss
+                </option>
+
+                <option value="cash_flow">
+                    Cash Flow Statement
+                </option>
+
+            </select>
+
+
+            <label for="file">
+                Financial Document
+            </label>
+
+            <div class="drop-zone" id="dropZone">
+
+                <input
+                    type="file"
+                    id="file"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    required
+                >
+
+                <div class="upload-icon">↑</div>
+
+                <h3>Choose a document</h3>
+
+                <p>
+                    PDF, PNG or JPG • Maximum 3 pages
+                </p>
+
+                <span id="fileName">
+                    No file selected
+                </span>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="primary-button"
+                id="processButton"
+            >
+                Process Document
+            </button>
+
+        </form>
+
+
+        <div id="message"></div>
+
+    </section>
+
+
+    <section class="documents-section">
+
+        <div class="section-header">
+
+            <div>
+                <h2>Recent Documents</h2>
+
+                <p>
+                    Previously processed financial documents
+                </p>
+            </div>
+
+            <button
+                class="refresh-button"
+                onclick="loadDocuments()"
+            >
+                Refresh
+            </button>
+
+        </div>
+
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Filename</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th></th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="documentsTable">
+
+                    <tr>
+                        <td colspan="6">
+                            Loading documents...
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script src="/static/js/app.js"></script>
+
+</body>
+</html>
