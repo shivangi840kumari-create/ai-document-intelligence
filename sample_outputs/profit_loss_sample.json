@@ -1,0 +1,40 @@
+{
+  "id": 3,
+  "filename": "sample_profit_loss.pdf",
+  "document_type": "profit_loss",
+  "status": "PASS",
+  "extracted_data": {
+    "document_type": "profit_loss",
+    "fields": {
+      "revenue": 1000000,
+      "cost_of_goods_sold": 400000,
+      "gross_profit": 600000,
+      "total_income": 1000000,
+      "total_expenses": 700000,
+      "net_profit": 300000
+    }
+  },
+  "financial_validation": {
+    "document_type": "profit_loss",
+    "overall_status": "PASS",
+    "tolerance": 0.01,
+    "validations": [
+      {
+        "rule": "gross_profit_calculation",
+        "expected_value": 600000,
+        "actual_value": 600000,
+        "difference": 0,
+        "status": "PASS",
+        "message": "Gross profit calculation is correct."
+      },
+      {
+        "rule": "net_profit_calculation",
+        "expected_value": 300000,
+        "actual_value": 300000,
+        "difference": 0,
+        "status": "PASS",
+        "message": "Net profit calculation is correct."
+      }
+    ]
+  }
+}

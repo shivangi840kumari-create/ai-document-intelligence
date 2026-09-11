@@ -1,0 +1,29 @@
+{
+  "id": 2,
+  "filename": "sample_balance_sheet.pdf",
+  "document_type": "balance_sheet",
+  "status": "PASS",
+  "extracted_data": {
+    "document_type": "balance_sheet",
+    "fields": {
+      "total_assets": 1000000,
+      "total_liabilities": 400000,
+      "total_equity": 600000
+    }
+  },
+  "financial_validation": {
+    "document_type": "balance_sheet",
+    "overall_status": "PASS",
+    "tolerance": 0.01,
+    "validations": [
+      {
+        "rule": "balance_sheet_equation",
+        "expected_value": 1000000,
+        "actual_value": 1000000,
+        "difference": 0,
+        "status": "PASS",
+        "message": "Balance sheet equation is correct."
+      }
+    ]
+  }
+}

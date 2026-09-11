@@ -1,0 +1,40 @@
+{
+  "id": 4,
+  "filename": "sample_cash_flow.pdf",
+  "document_type": "cash_flow",
+  "status": "PASS",
+  "extracted_data": {
+    "document_type": "cash_flow",
+    "fields": {
+      "operating_cash_flow": 500000,
+      "investing_cash_flow": -100000,
+      "financing_cash_flow": 100000,
+      "net_cash_flow": 500000,
+      "opening_cash": 1000000,
+      "closing_cash": 1500000
+    }
+  },
+  "financial_validation": {
+    "document_type": "cash_flow",
+    "overall_status": "PASS",
+    "tolerance": 0.01,
+    "validations": [
+      {
+        "rule": "net_cash_flow_calculation",
+        "expected_value": 500000,
+        "actual_value": 500000,
+        "difference": 0,
+        "status": "PASS",
+        "message": "Net cash flow calculation is correct."
+      },
+      {
+        "rule": "closing_cash_calculation",
+        "expected_value": 1500000,
+        "actual_value": 1500000,
+        "difference": 0,
+        "status": "PASS",
+        "message": "Closing cash calculation is correct."
+      }
+    ]
+  }
+}
